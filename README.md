@@ -21,6 +21,18 @@ Other models and firmware versions will differ. Read the whole page before you s
 Nothing on the read-only system partitions is modified. Everything lives in `/var/lib/webosbrew/cleantv` and is applied at boot by
 two Homebrew Channel init.d hooks. `uninstall.sh` puts LG's Home back.
 
+## The whole path, in order
+
+| # | Step | Where |
+|---|---|---|
+| 0 | Check rootability, root the TV, Homebrew Channel: Root status ok, **Block system updates**, **SSH server** on, SSH key | [docs/STEP-0-HOMEBREW-SSH.md](docs/STEP-0-HOMEBREW-SSH.md) |
+| 1 | Copy this repo to the TV and run `tv/install.sh` — hooks, settings switches, ad/telemetry block, launcher active immediately | *Install* below |
+| 2 | Edit `config/hidden_apps.txt`, `config/order.txt`, optional `config/remove_apps.txt`; run `order.sh` | *Customize* below |
+| 3 | Replace `launcher/wallpaper.jpg`, adjust `index.html` if you like | *Customize* below |
+| 4 | Reboot once and watch: last input at ~13 s, launcher at ~26 s | *Boot behaviour* below |
+| 5 | Optional: IPTV player, why not Kodi on webOS 26 | [docs/IPTV.md](docs/IPTV.md) |
+| 6 | If anything looks wrong: rollback in one command, read the boot log | *Rollback*, [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) |
+
 ## Requirements
 
 1. A **rooted** LG webOS TV with **Homebrew Channel** and **SSH** enabled. Root instructions and the "can I root my TV" table live at
@@ -64,7 +76,7 @@ ssh root@<tv-ip> 'sh /var/lib/webosbrew/cleantv/bin/rollback-home.sh --permanent
 ssh root@<tv-ip> 'sh /tmp/cleantv/tv/uninstall.sh'                                   # everything off, tiles unhidden
 ```
 
-Both work at runtime, no reboot needed. The settings switches (`settings.sh`) are LG's own settings; turn them back on in the TV menu if you miss them.
+Both work at runtime, no reboot needed. Tiles hidden with `hideLaunchPoint` stay hidden in LG's Home too until you run `uninstall.sh` (it unhides them) or `unhideLaunchPoint` yourself. The settings switches (`settings.sh`) are LG's own settings; turn them back on in the TV menu if you miss them.
 
 ## How it works (short)
 
@@ -78,7 +90,7 @@ Both work at runtime, no reboot needed. The settings switches (`settings.sh`) ar
 - Tiles are hidden with the official `homelaunchpoints/hideLaunchPoint`; order with `moveLaunchPoint`. Both are reversible.
 - Icons: the web app may not load `file://` icons from other app folders, so `refresh.sh` copies them into the launcher folder.
 
-Details: [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md). Things that went wrong and why: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+Optional IPTV step: [docs/IPTV.md](docs/IPTV.md). Details: [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md). Things that went wrong and why: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## Boot behaviour
 

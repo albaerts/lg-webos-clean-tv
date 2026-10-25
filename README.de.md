@@ -17,6 +17,18 @@ Andere Modelle und Firmware-Stände weichen ab. Bitte die ganze Seite lesen, bev
 Die schreibgeschützten Systempartitionen werden nicht verändert. Alles liegt in `/var/lib/webosbrew/cleantv` und wird beim Boot von zwei
 Homebrew-Channel-Hooks angewendet. `uninstall.sh` stellt LGs Home wieder her.
 
+## Der ganze Weg, in dieser Reihenfolge
+
+| # | Schritt | Wo |
+|---|---|---|
+| 0 | Rootbarkeit prüfen, TV rooten, Homebrew Channel: Root-Status ok, **Block system updates**, **SSH server** an, SSH-Schlüssel | [docs/STEP-0-HOMEBREW-SSH.md](docs/STEP-0-HOMEBREW-SSH.md) (Englisch) |
+| 1 | Repo auf den TV kopieren, `tv/install.sh` ausführen: Hooks, Einstellungsschalter, Werbe-/Telemetrie-Block, Launcher sofort aktiv | *Installation* unten |
+| 2 | `config/hidden_apps.txt`, `config/order.txt`, optional `config/remove_apps.txt` anpassen, `order.sh` ausführen | *Anpassen* unten |
+| 3 | `launcher/wallpaper.jpg` ersetzen, bei Bedarf `index.html` anpassen | *Anpassen* unten |
+| 4 | Einmal neu starten und zuschauen: letzter Eingang bei ~13 s, Launcher bei ~26 s | *Boot-Verhalten* unten |
+| 5 | Optional: IPTV-Player, und warum Kodi auf webOS 26 nicht geht | [docs/IPTV.md](docs/IPTV.md) (Englisch) |
+| 6 | Wenn etwas nicht stimmt: Rückbau mit einem Befehl, Boot-Log lesen | *Rückbau*, [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) |
+
 ## Voraussetzungen
 
 1. Ein **gerooteter** LG-webOS-TV mit **Homebrew Channel** und **SSH**. Root-Anleitungen und die Tabelle „kann ich meinen TV rooten“:
@@ -60,7 +72,7 @@ ssh root@<tv-ip> 'sh /var/lib/webosbrew/cleantv/bin/rollback-home.sh --permanent
 ssh root@<tv-ip> 'sh /tmp/cleantv/tv/uninstall.sh'                                   # alles aus, Kacheln wieder sichtbar
 ```
 
-Beides zur Laufzeit, kein Neustart nötig. Die Einstellungsschalter sind LGs eigene Optionen und lassen sich im TV-Menü wieder einschalten.
+Beides zur Laufzeit, kein Neustart nötig. Mit `hideLaunchPoint` ausgeblendete Kacheln bleiben auch in LGs Home ausgeblendet, bis `uninstall.sh` sie wieder einblendet oder du `unhideLaunchPoint` aufrufst. Die Einstellungsschalter sind LGs eigene Optionen und lassen sich im TV-Menü wieder einschalten.
 
 ## Wie es funktioniert (kurz)
 
@@ -74,7 +86,7 @@ Beides zur Laufzeit, kein Neustart nötig. Die Einstellungsschalter sind LGs eig
 - Kacheln werden mit dem offiziellen `homelaunchpoints/hideLaunchPoint` ausgeblendet, die Reihenfolge mit `moveLaunchPoint`. Beides reversibel.
 - Icons: Die Web-App darf keine `file://`-Icons aus fremden App-Ordnern laden, darum kopiert `refresh.sh` sie in den Launcher-Ordner.
 
-Details: [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md). Was schiefging und warum: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+Optionaler IPTV-Schritt: [docs/IPTV.md](docs/IPTV.md). Details: [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md). Was schiefging und warum: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## Boot-Verhalten
 

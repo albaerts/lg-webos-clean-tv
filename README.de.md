@@ -26,6 +26,8 @@ Homebrew-Channel-Hooks angewendet. `uninstall.sh` stellt LGs Home wieder her.
 3. Ein Computer mit `ssh`/`scp`. Standardpasswort des Homebrew-SSH-Servers ist `alpine`, ändern oder Schlüssel verwenden.
 4. `/usr/bin/node` auf dem TV (ab webOS 5 vorhanden; kopiert die App-Icons).
 
+**Noch nicht gerootet?** Beginne mit [docs/STEP-0-HOMEBREW-SSH.md](docs/STEP-0-HOMEBREW-SSH.md) (Englisch): wo die Root-Methoden dokumentiert sind, Homebrew-Channel-Einstellungen, SSH-Schlüssel, IPK-Installation und die ares-cli-Fallen.
+
 ## Installation (10 Minuten)
 
 ```bash

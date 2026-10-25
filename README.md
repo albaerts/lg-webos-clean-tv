@@ -30,6 +30,8 @@ two Homebrew Channel init.d hooks. `uninstall.sh` puts LG's Home back.
 3. A computer with `ssh`/`scp`. Default root password of Homebrew Channel's SSH server is `alpine` — change it or use a key.
 4. `/usr/bin/node` on the TV (present on webOS 5+; used to copy app icons).
 
+**Not rooted yet?** Start with [docs/STEP-0-HOMEBREW-SSH.md](docs/STEP-0-HOMEBREW-SSH.md): where the root methods are documented, Homebrew Channel settings, SSH keys, installing IPKs, and the ares-cli traps.
+
 ## Install (10 minutes)
 
 ```bash

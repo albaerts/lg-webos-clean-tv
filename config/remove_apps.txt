@@ -1,0 +1,5 @@
+# OPTIONAL: Store-preloaded apps to remove at every boot (LG re-registers them after each SAM rescan).
+# Only "removable" apps work here. Leave empty to disable. Examples:
+# com.apple.appletv
+# com.emby.app
+# com.twin.app.gamingportal

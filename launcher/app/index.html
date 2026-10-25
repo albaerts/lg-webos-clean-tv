@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home</title>
+<!-- lg-webos-clean-tv launcher: a minimal Home for rooted LG webOS TVs. Edit wallpaper.jpg, colors and sizes below. -->
+<style>
+  html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#0b1a2e;font-family:"LG Smart UI","Helvetica Neue",Arial,sans-serif;color:#fff;-webkit-user-select:none;user-select:none}
+  #wall{position:absolute;inset:0;background:url(wallpaper.jpg) center/cover no-repeat}
+  #dim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 55%,rgba(0,0,0,.45) 100%)}
+  #clock{position:absolute;left:72px;top:64px;padding:26px 40px 30px;border-radius:28px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 10px 40px rgba(0,0,0,.25)}
+  #time{font-size:96px;font-weight:600;line-height:1;letter-spacing:-1px;text-shadow:0 2px 12px rgba(0,0,0,.3)}
+  #date{margin-top:12px;font-size:30px;font-weight:400;opacity:.92}
+  #row{position:absolute;left:0;bottom:84px;height:190px;white-space:nowrap;will-change:transform;transition:transform .22s ease}
+  .tile{display:inline-block;vertical-align:top;width:124px;margin:0 10px;text-align:center;transition:transform .18s ease}
+  .tile .ic{width:124px;height:124px;border-radius:26px;background:#2a2a2e center/cover no-repeat;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:box-shadow .18s ease,transform .18s ease}
+  .tile .lb{margin-top:12px;font-size:22px;opacity:0;transition:opacity .18s ease;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+  .tile.focus{transform:scale(1.14)}
+  .tile.focus .ic{box-shadow:0 0 0 3px #fff,0 12px 36px rgba(0,0,0,.5)}
+  .tile.focus .lb{opacity:1}
+  #msg{position:absolute;right:48px;top:48px;font-size:22px;opacity:.6}
+</style>
+</head>
+<body>
+<div id="wall"></div><div id="dim"></div>
+<div id="clock"><div id="time">--:--</div><div id="date"></div></div>
+<div id="row"></div>
+<div id="msg"></div>
+<script src="lp.js"></script>
+<script>
+(function(){
+  var ROW_LEFT = 72, TILE_W = 144; // tile width + margins
+  var tiles = [], idx = 0, row = document.getElementById('row'), msg = document.getElementById('msg');
+  function luna(uri, params, cb){
+    try{
+      var B = window.WebOSServiceBridge || window.PalmServiceBridge;
+      var b = new B();
+      b.onservicecallback = function(s){ var r; try{ r = JSON.parse(s); }catch(e){ r = {raw:s}; } cb(r); };
+      b.call(uri, JSON.stringify(params||{}));
+    }catch(e){ cb({error:String(e)}); }
+  }
+  function pad(n){ return (n<10?'0':'')+n; }
+  function tick(){
+    var d = new Date();
+    document.getElementById('time').textContent = pad(d.getHours())+':'+pad(d.getMinutes());
+    document.getElementById('date').textContent = d.toLocaleDateString(navigator.language||'en-GB',{weekday:'long',day:'numeric',month:'long'});
+  }
+  function iconUrl(lp){
+    var p = lp.largeIcon || lp.mediumLargeIcon || lp.icon || '';
+    var ext = p ? p.split('.').pop().toLowerCase() : 'png';
+    return 'icons/'+lp.id+'.'+ext;
+  }
+  function render(list){
+    row.innerHTML = '';
+    tiles = list.map(function(lp,i){
+      var t = document.createElement('div'); t.className='tile'; t.dataset.i=i;
+      var ic = document.createElement('div'); ic.className='ic';
+      var u = iconUrl(lp); var im = new Image(); im.onload=function(){ ic.style.backgroundImage='url("'+u+'")'; }; im.onerror=function(){ ic.textContent=(lp.title||'?').charAt(0); ic.style.font='60px/124px sans-serif'; }; im.src=u;
+      var bg = (lp.bgColor && lp.bgColor.indexOf('#')===0) ? lp.bgColor : ((lp.iconColor && lp.iconColor.indexOf('#')===0) ? lp.iconColor : '');
+      if(bg) ic.style.backgroundColor = bg;
+      var lb = document.createElement('div'); lb.className='lb'; lb.textContent = lp.title||lp.id;
+      t.appendChild(ic); t.appendChild(lb);
+      t.addEventListener('mouseenter', function(){ setFocus(i); });
+      t.addEventListener('click', function(){ setFocus(i); launch(); });
+      row.appendChild(t);
+      return {el:t, lp:lp};
+    });
+    setFocus(Math.min(idx, tiles.length-1));
+  }
+  function setFocus(i){
+    if(!tiles.length) return;
+    idx = Math.max(0, Math.min(i, tiles.length-1));
+    tiles.forEach(function(t,k){ t.el.classList.toggle('focus', k===idx); });
+    var visible = Math.floor((1920 - ROW_LEFT*2)/TILE_W);
+    var first = Math.max(0, Math.min(idx - Math.floor(visible/2), tiles.length - visible));
+    row.style.transform = 'translateX('+(ROW_LEFT - first*TILE_W)+'px)';
+  }
+  function launch(){
+    var lp = tiles[idx] && tiles[idx].lp; if(!lp) return;
+    var p = {id: lp.id}; if(lp.params && Object.keys(lp.params).length) p.params = lp.params;
+    luna('luna://com.webos.applicationManager/launch', p, function(r){ if(!r.returnValue) msg.textContent = 'launch failed: '+(r.errorText||''); });
+  }
+  function load(){
+    luna('luna://com.webos.service.homelaunchpoints/listLaunchPoints', {}, function(r){
+      if(r.returnValue && r.launchPoints){ finish(r.launchPoints); return; }
+      luna('luna://com.webos.applicationManager/listLaunchPoints', {}, function(r2){
+        if(r2.returnValue && r2.launchPoints){ finish(r2.launchPoints); }
+        else if(window.LP && window.LP.length){ finish(window.LP); msg.textContent='static list'; }
+        else msg.textContent = 'listLaunchPoints failed: '+JSON.stringify(r2).slice(0,120);
+      });
+    });
+  }
+  function finish(lps){
+    var list = lps.filter(function(lp){ return !lp.hidden && lp.id !== 'com.webos.app.home'; });
+    render(list);
+  }
+  document.addEventListener('keydown', function(e){
+    switch(e.keyCode){
+      case 37: setFocus(idx-1); e.preventDefault(); break;
+      case 39: setFocus(idx+1); e.preventDefault(); break;
+      case 13: launch(); e.preventDefault(); break;
+      case 461: case 27: window.close(); break;
+    }
+  });
+  document.addEventListener('webOSRelaunch', load);
+  tick(); setInterval(tick, 10000); load();
+})();
+</script>
+</body>
+</html>

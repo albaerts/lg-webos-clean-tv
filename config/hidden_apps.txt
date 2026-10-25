@@ -1,0 +1,13 @@
+# One launch point id per line. These tiles are hidden from the app row (hideLaunchPoint).
+# Find ids with:  luna-send -n 1 -f luna://com.webos.service.homelaunchpoints/listLaunchPoints '{}'
+# Hiding is reversible (unhideLaunchPoint). Examples for a typical LG TV:
+com.webos.app.lgchannels
+com.webos.app.livetv
+com.webos.app.homeconnect
+com.webos.app.camera
+com.webos.app.storagemanager
+com.webos.app.multiviewsettings
+amazon.alexa.view
+com.webos.app.lglink-full
+com.webos.app.lifeonscreen
+com.webos.app.sportsteamsettings

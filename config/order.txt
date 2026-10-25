@@ -1,0 +1,7 @@
+# App row order, top = leftmost. Launch point ids (app ids). Apps not listed keep their current position after these.
+com.webos.app.discovery
+netflix
+youtube.leanback.v4
+com.webos.app.browser
+com.webos.app.mediadiscovery
+org.webosbrew.hbchannel

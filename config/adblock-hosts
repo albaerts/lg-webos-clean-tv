@@ -1,0 +1,16 @@
+# LG ad / telemetry / ACR domains (safe tier, source: furkan-bayrak/lg-tv-blocklist). One per line, 0.0.0.0 <host>
+0.0.0.0 ad.lgappstv.com
+0.0.0.0 ads.lgtvcommon.com
+0.0.0.0 adsdtvc.com
+0.0.0.0 cdpbeacon.lgtvcommon.com
+0.0.0.0 info.lgsmartad.com
+0.0.0.0 de.info.lgsmartad.com
+0.0.0.0 lgsmartad.com
+0.0.0.0 smart.adtvc.app
+0.0.0.0 eic.nudge.lgtvcommon.com
+0.0.0.0 eic.cdpbeacon.lgtvcommon.com
+0.0.0.0 aic.cdpbeacon.lgtvcommon.com
+0.0.0.0 kic.cdpbeacon.lgtvcommon.com
+0.0.0.0 recommend.lgtvcommon.com
+0.0.0.0 homeprv.lgtvcommon.com
+0.0.0.0 lgad.cjpowercast.com.edgesuite.net

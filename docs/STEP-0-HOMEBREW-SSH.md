@@ -10,6 +10,22 @@ the methods; follow their README for your exact model and firmware, not blog pos
 
 Everything below is plain device administration and was done on an LG C3 (webOS 11.2, October 2026).
 
+## Checking whether the TV can be rooted, then rooting (how we do it for a second TV)
+
+**Step 1, checking whether the TV can be rooted:**
+
+1. On the TV: Settings, All Settings, Support, then "About This TV" or "Software Info". There you find the model number and the webOS
+   software version, for example `11.2.0-3701` as on the reference C3.
+2. On your computer or phone, open [cani.rootmy.tv](https://cani.rootmy.tv). Enter the model and software version or look them up in the
+   table. The page tells you whether and with which method this version can be rooted, and links directly to that method.
+3. Compare with the first TV: if the second one is on the same version, the same method applies. If it is newer, only what
+   cani.rootmy.tv says about that newer version counts. Above all, in that case: stop allowing system updates on the second TV
+   (Settings → Support → Software Update → automatic updates off) until it is clear whether the version remains rootable.
+
+**Step 2, the rooting itself,** follows the instructions of the tool that worked on the first TV. The link is in the [README](../README.md)
+under Requirements. In practice this means: open that project's README on GitHub, work through its prerequisites, computer and TV on the
+same network, TV IP address noted, and then carry out its steps in the given order.
+
 ## What the root method leaves you with
 
 On the reference TV the rooting tool installed **Homebrew Channel** (0.7.3) itself; no separate install was needed. Its README told

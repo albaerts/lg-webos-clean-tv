@@ -24,7 +24,7 @@ two Homebrew Channel init.d hooks. `uninstall.sh` puts LG's Home back.
 
 | # | Step | Where |
 |---|---|---|
-| 0 | Check rootability, root the TV, Homebrew Channel: Root status ok, **Block system updates**, **SSH server** on, SSH key | [docs/STEP-0-HOMEBREW-SSH.md](docs/STEP-0-HOMEBREW-SSH.md) |
+| 0 | Check rootability on cani.rootmy.tv, root the TV following the tool's README, Homebrew Channel: Root status ok, **Block system updates**, **SSH server** on, SSH key | [docs/STEP-0-HOMEBREW-SSH.md](docs/STEP-0-HOMEBREW-SSH.md) |
 | 1 | Copy this repo to the TV and run `tv/install.sh` — hooks, settings switches, ad/telemetry block, launcher active immediately | *Install* below |
 | 2 | Edit `config/hidden_apps.txt`, `config/order.txt`, optional `config/remove_apps.txt`; run `order.sh` | *Customize* below |
 | 3 | Replace `launcher/wallpaper.jpg`, adjust `index.html` if you like | *Customize* below |

@@ -10,6 +10,16 @@ the methods; follow their README for your exact model and firmware, not blog pos
 
 Everything below is plain device administration and was done on an LG C3 (webOS 11.2, October 2026).
 
+## What the root method leaves you with
+
+On the reference TV the rooting tool installed **Homebrew Channel** (0.7.3) itself; no separate install was needed. Its README told
+us to **remove LG's Developer Mode app before the first reboot** — skipping that would have lost root. Follow your method's README
+for such details, they differ per tool. After the reboot, Homebrew Channel showed *Root status: ok*.
+
+Homebrew Channel also brings the mechanism this project relies on: at boot it runs every executable file in
+`/var/lib/webosbrew/init.d/` (via `run-parts`). If a hook crashes the boot, Homebrew Channel starts in **failsafe mode**
+(root customizations disabled once, a toast tells you) — that is your safety net while experimenting.
+
 ## Homebrew Channel settings (do this right after rooting)
 
 Open Homebrew Channel → Settings:

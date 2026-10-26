@@ -6,7 +6,6 @@ no "Live on LG Channels"**, **LG ad / telemetry / ACR hosts blocked**, promotion
 Tested end to end on an **LG OLED77C37LA (C3, 2023), webOS 11.2.0-3701 ("webOS 26"), October 2026**, rooted with Homebrew Channel.
 Other models and firmware versions will differ. Read the whole page before you start.
 
-[Deutsche Anleitung → README.de.md](README.de.md)
 
 ![before / after](docs/before-after.png)
 

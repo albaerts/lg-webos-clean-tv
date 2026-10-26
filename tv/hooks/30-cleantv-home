@@ -1,11 +1,10 @@
 #!/bin/sh
-# 30-cleantv-home - at every boot: mount the launcher over LG Home, let SAM re-read the manifest WITHOUT restarting SAM,
-# close the LG Home process through SAM, apply app row, open the launcher and verify it is in the foreground.
-# RULES learned the hard way (see docs/TROUBLESHOOTING.md):
+# 30-cleantv-home - at every boot: make sure the launcher is Home, apply app row, switch off unwanted LG features, performance levers,
+# keep LG's preloaded apps closed. RULES learned the hard way (see docs/TROUBLESHOOTING.md):
 #  - never restart sam.service from a hook (eim.service Requires=sam -> deadlock; systemui monitor floods the bus; 90 s stop timeout)
 #  - keep exactly ONE executable file per hook in init.d (run-parts runs everything, even .bak copies)
-#  - count mounts via /proc/mounts target paths, not via `mount` output
 #  - never kill LG Home right before launching the launcher; close it via SAM and wait (black-screen cause no. 6)
+#  - the normal path needs no mount at all: the launcher lives in the system_updatable app path with a higher version (activate.sh)
 . /var/lib/webosbrew/cleantv/bin/common.sh
 mkdir -p $CT/log; exec >>"$CT/log/boot.log" 2>&1
 echo "=== $(date) uptime=$(cut -d. -f1 /proc/uptime)s START ==="
@@ -13,23 +12,30 @@ echo "=== $(date) uptime=$(cut -d. -f1 /proc/uptime)s START ==="
   i=0; while [ $i -lt 120 ]; do sam_ok && break; sleep 2; i=$((i+2)); done
   log "SAM ready after ${i}s"
   ls2 $L/releaseBlockSystemApp '{"id":"com.webos.app.home"}' >/dev/null   # never leave Home blocked from an interrupted run
-  # webOS remounts app partitions ~35 s after boot and drops bind mounts: retry until the mount sticks
-  a=0; while [ $a -lt 40 ]; do home_mounted || mount --bind $APP $HOME_T 2>/dev/null; sleep 2; home_mounted && break; a=$((a+1)); done
-  home_mounted || { log "mount did not stick - keeping LG Home"; exit 0; }
-  log "launcher mounted (attempt $a)"
-  reread_app com.webos.app.home
-  k=0; while [ $k -lt 30 ]; do [ "$(home_type)" = "web" ] && break; sleep 1; k=$((k+1)); done
-  [ "$(home_type)" = "web" ] || { reread_app com.webos.app.home; k=0; while [ $k -lt 30 ]; do [ "$(home_type)" = "web" ] && break; sleep 1; k=$((k+1)); done; }
-  if [ "$(home_type)" = "web" ]; then
-    log "SAM took the launcher as Home"
-    close_lg_home                      # bootd may have opened LG Home first (TV was switched off while on Home)
-    launch_home_verified && log "launcher in foreground" || log "launcher did not reach the foreground after 3 attempts"
-    sh $CT/bin/order.sh >/dev/null 2>&1
-    sh $CT/bin/remove-preloads.sh >/dev/null 2>&1
-    for w in 30 60 120; do sleep $w; for p in $(lg_home_pids); do kill $p 2>/dev/null && log "stray LG Home $p stopped"; done; done
+  if [ -f $UPD/appinfo.json ] && [ "$(home_type)" = web ] && [ "$(home_folder)" = "$UPD" ]; then
+    log "launcher is Home from $UPD (fg='$(fg_app)') - direct start, nothing to mount"
   else
-    log "SAM kept type=$(home_type) - unmounting, LG Home stays"
-    umount $HOME_T 2>/dev/null; reread_app com.webos.app.home
+    # fallback: bind mount + manifest re-read (older method; also used when SAM did not take the system_updatable copy)
+    a=0; while [ $a -lt 40 ]; do home_mounted || mount --bind $APP $HOME_T 2>/dev/null; sleep 2; home_mounted && break; a=$((a+1)); done
+    home_mounted || { log "mount did not stick - keeping LG Home"; exit 0; }
+    reread_app com.webos.app.home
+    k=0; while [ $k -lt 30 ]; do [ "$(home_type)" = web ] && break; sleep 1; k=$((k+1)); done
+    [ "$(home_type)" = web ] || { log "SAM kept type=$(home_type) - unmounting, LG Home stays"; umount $HOME_T 2>/dev/null; reread_app com.webos.app.home; exit 0; }
+    log "SAM took the launcher via bind mount"
+    close_lg_home
   fi
+  launch_home_verified && log "launcher in foreground" || log "launcher did not reach the foreground after 3 attempts"
+  sh $CT/bin/order.sh >/dev/null 2>&1
+  sh $CT/bin/remove-preloads.sh >/dev/null 2>&1
+  [ "$(fg_app)" = com.webos.app.home ] && ls2 $L/launch '{"id":"com.webos.app.home"}' >/dev/null   # relaunch = webOSRelaunch -> row re-read
+  close_preloads() { for a in $(strip $CFG/close_preloads.txt); do ls2 $L/running '{}' | grep -q "\"id\": *\"$a\"" && [ "$(fg_app)" != "$a" ] && ls2 $L/closeByAppId "{\"id\":\"$a\"}" >/dev/null && log "closed preloaded $a"; done; }
+  for w in 30 60 120; do sleep $w
+    [ -x $CT/bin/lean.sh ] && sh $CT/bin/lean.sh && log "lean.sh applied (+${w}s)"
+    [ -x $CT/bin/perf.sh ] && sh $CT/bin/perf.sh >/dev/null && log "perf.sh applied (+${w}s)"
+    for p in $(lg_home_pids); do kill $p 2>/dev/null && log "stray LG Home $p stopped"; done
+    close_preloads
+  done
+  # LG's preload manager keeps re-launching apps from its usage model (e.g. LG Channels, Browser) -> keep closing them, forever, cheaply
+  while :; do sleep 120; close_preloads >/dev/null; done
 ) &
 exit 0

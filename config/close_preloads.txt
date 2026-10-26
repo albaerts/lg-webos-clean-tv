@@ -1,0 +1,4 @@
+# Apps LG preloads into RAM at boot and re-launches from its usage model, although you never open them. The hook closes them
+# whenever they are not in the foreground (every 2 minutes). One app id per line.
+com.webos.app.lgchannels
+com.webos.app.browser

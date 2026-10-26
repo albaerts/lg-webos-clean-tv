@@ -90,3 +90,48 @@ Run `sh /var/lib/webosbrew/cleantv/bin/refresh.sh` (also runs at boot). WAM bloc
 
 `/var/lib/webosbrew/cleantv/log/boot.log` — one block per boot with timestamps. `/var/log/messages` has `sam` launch lines
 (`NL_APP_LAUNCH_BEGIN`), `/var/log/bootd.log` shows when bootd put which app in front.
+
+## The launcher shows the old page after you edited index.html
+
+`closeByAppId` + `launch` brings back the OLD page: the web app manager keeps the instance and just re-shows it. Kill its renderer first
+(`activate.sh` and `reload_home` in `common.sh` do this):
+
+```bash
+luna-send -n 1 -f luna://com.webos.service.webappmanager/listRunningApps '{"includeSysApps":true}'   # webprocessid of com.webos.app.home
+luna-send -n 1 -f luna://com.webos.applicationManager/closeByAppId '{"id":"com.webos.app.home"}'; kill -9 <webprocessid>; sleep 4
+luna-send -n 1 -f luna://com.webos.applicationManager/launch '{"id":"com.webos.app.home"}'
+```
+
+## An HDMI input does not move in the row
+
+Launch points of inputs are *bookmarks* with a numeric `launchPointId` (e.g. `971517`), not `<app id>_default`. `order.sh` resolves ids
+through `listLaunchPoints`; if you call `moveLaunchPoint` by hand, use the numeric id.
+
+## The row order is right in `listLaunchPoints` but the launcher shows the old order
+
+The launcher reads the list only on launch and on `webOSRelaunch`. Launch Home once more (the hook does it after `order.sh`).
+
+## A blocked host still resolves with nslookup
+
+`nslookup` asks connman's DNS proxy directly and bypasses `/etc/hosts`. Processes use the libc resolver, which reads `/etc/hosts` first.
+Test with `ping -c1 <host>`: a blocked host answers from `127.0.0.1` / `0.0.0.0`.
+
+## I killed my own SSH session with pkill
+
+`pkill -f /usr/sbin/<name>` also matches the shell whose command line contains that string - your own session. Use `pkill -x <name>`
+(exact process name, 15 characters max) or `pgrep -f '^/full/path'` anchored at the start.
+
+## Testing an app with `launch` put it on screen
+
+`applicationManager/launch` always brings the app to the foreground, including hidden ones. Launch `com.webos.app.home` to get back.
+
+## A stopped service is back after a minute
+
+It is a dynamic luna service: ls-hubd respawns it on the next call. Stopping is pointless; overlay the binary with the sleeping stub
+(`lean.sh` does this for `sdx`, `uploadd`, `iconnectivity`), or find the caller with `ls-monitor` and stop that.
+
+## The screen saver appears although the TV is "on"
+
+LG's screen saver (a thin clock on black) is started by `tvpower` after a few minutes without a visible surface change. If it appears
+right after boot, nothing was drawn: check `getForegroundAppInfo` of the surface manager (cause no. 6 above).
+

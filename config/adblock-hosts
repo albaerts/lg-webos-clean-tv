@@ -1,4 +1,6 @@
-# LG ad / telemetry / ACR domains (safe tier, source: furkan-bayrak/lg-tv-blocklist). One per line, 0.0.0.0 <host>
+# LG ad / telemetry / ACR / cloud domains, one "0.0.0.0 <host>" per line. Applied to /etc/hosts at every boot by 10-cleantv-adblock.
+# Check a block with `ping -c1 <host>` on the TV (must answer from 127.0.0.1/0.0.0.0). `nslookup` bypasses /etc/hosts and shows real IPs.
+# ads (source: furkan-bayrak/lg-tv-blocklist, safe tier)
 0.0.0.0 ad.lgappstv.com
 0.0.0.0 ads.lgtvcommon.com
 0.0.0.0 adsdtvc.com
@@ -14,3 +16,33 @@
 0.0.0.0 recommend.lgtvcommon.com
 0.0.0.0 homeprv.lgtvcommon.com
 0.0.0.0 lgad.cjpowercast.com.edgesuite.net
+# telemetry / remote diagnostics (RDX), analytics (SDX)
+0.0.0.0 rdx2.lgtvsdp.com
+0.0.0.0 us.rdx2.lgtvsdp.com
+0.0.0.0 eic.rdx2.lgtvsdp.com
+0.0.0.0 aic.rdx2.lgtvsdp.com
+0.0.0.0 kic.rdx2.lgtvsdp.com
+0.0.0.0 sdx.lgtvsdp.com
+0.0.0.0 eic.sdx.lgtvsdp.com
+# ThinQ / IoT cloud
+0.0.0.0 eic.lgtviot.com
+0.0.0.0 us.lgtviot.com
+0.0.0.0 aic.lgtviot.com
+0.0.0.0 kic.lgtviot.com
+# content discovery / recommendations / LG service API used by LG Channels, Sports, Home shelves
+0.0.0.0 eic.cdplauncher.lgtvcommon.com
+0.0.0.0 us.cdplauncher.lgtvcommon.com
+0.0.0.0 eic.cdpsvc.lgtvcommon.com
+0.0.0.0 us.cdpsvc.lgtvcommon.com
+0.0.0.0 eic.service.lgtvcommon.com
+0.0.0.0 us.service.lgtvcommon.com
+# fitness / misc LG hosts
+0.0.0.0 eic.homegym.lgappstv.com
+0.0.0.0 aic.homegym.lgappstv.com
+0.0.0.0 kic.homegym.lgappstv.com
+0.0.0.0 dokdo.lge.com
+0.0.0.0 hlm.lge.com
+0.0.0.0 collab.lge.com
+0.0.0.0 wam.lge.com
+# NOT blocked on purpose: lgtvonline.lge.com (connman's online check - the TV would believe it is offline),
+# *.emp.lgsmartplatform.com (LG account), *.lgappstv.com store hosts (app installs/updates), snu/su.lge.com (firmware - Homebrew Channel blocks updates already)

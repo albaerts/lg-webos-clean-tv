@@ -29,7 +29,9 @@ Open the app once. **Settings (Blue key) → Device Setup** shows a QR code / UR
 or computer on the same network; credentials never leave the TV. In **Xtream Accounts** pick *HLS* as live format if raw MPEG-TS over
 HTTP stutters on webOS 26, and select only the live categories you use if memory gets tight.
 
-Then put the player into your app row: add `com.lennylxx.iptv` to `config/order.txt` and run `sh /var/lib/webosbrew/cleantv/bin/order.sh`.
+Then put the player into your app row: add `com.lennylxx.iptv` to `config/order.txt`, give it a glyph in the launcher's `GLYPH` table if you
+like, and run `sh /var/lib/webosbrew/cleantv/bin/order.sh`. On the reference TV the household later settled on a store IPTV app it
+already owned; the player below remains the tracking-free recommendation.
 
 ## Store IPTV apps
 

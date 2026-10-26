@@ -1,6 +1,6 @@
 {
     "id": "com.webos.app.home",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "vendor": "LG Electronics",
     "type": "web",
     "main": "index.html",
@@ -13,22 +13,39 @@
     "largeIcon": "icon.png",
     "iconColor": "#1ec15f",
     "visible": false,
-    "class": { "hidden": true },
+    "class": {
+        "hidden": true
+    },
     "disableBackHistoryAPI": true,
     "lockable": false,
     "supportQuickStart": false,
     "hasPromotion": false,
-    "accessibility": { "supportsAudioGuidance": true },
+    "accessibility": {
+        "supportsAudioGuidance": true
+    },
     "handleScreenRemoteKey": true,
     "enablePigScreenSaver": false,
     "hasAccountService": true,
-    "appCategory": ["home"],
+    "appCategory": [
+        "home"
+    ],
     "resolution": "1920x1080",
     "uiRevision": 2,
     "supportTouchMode": "full",
     "requiredPermissions": [
-        "applications", "applications.launcher", "applications.operation", "applications.internal",
-        "hlp.internal", "launcher.status", "launcher.control", "sdx.control", "settings", "system",
-        "database.internal", "database", "private", "usercontextmanager.internal"
+        "applications",
+        "applications.launcher",
+        "applications.operation",
+        "applications.internal",
+        "hlp.internal",
+        "launcher.status",
+        "launcher.control",
+        "sdx.control",
+        "settings",
+        "system",
+        "database.internal",
+        "database",
+        "private",
+        "usercontextmanager.internal"
     ]
 }

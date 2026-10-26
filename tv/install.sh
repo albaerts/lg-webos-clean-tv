@@ -9,7 +9,7 @@ SRC=$(cd "$(dirname "$0")/.." && pwd)
 CT=/var/lib/webosbrew/cleantv
 mkdir -p $CT/bin $CT/config $CT/launcher $CT/log /var/lib/webosbrew/off
 cp $SRC/tv/bin/*.sh $SRC/tv/bin/*.js $CT/bin/; chmod +x $CT/bin/*.sh
-for f in hidden_apps.txt order.txt remove_apps.txt adblock-hosts; do [ -f $CT/config/$f ] || cp $SRC/config/$f $CT/config/$f; done
+for f in hidden_apps.txt order.txt remove_apps.txt close_preloads.txt adblock-hosts lean.conf perf.conf settings.conf; do [ -f $CT/config/$f ] || cp $SRC/config/$f $CT/config/$f; done
 cp -r $SRC/launcher/app/. $CT/launcher/
 cp $SRC/tv/hooks/10-cleantv-adblock /var/lib/webosbrew/init.d/10-cleantv-adblock
 cp $SRC/tv/hooks/30-cleantv-home   /var/lib/webosbrew/init.d/30-cleantv-home
@@ -18,5 +18,7 @@ echo "files installed under $CT and /var/lib/webosbrew/init.d"
 sh $CT/bin/settings.sh
 sh /var/lib/webosbrew/init.d/10-cleantv-adblock && echo "ad/telemetry hosts blocked (this boot)"
 sh $CT/bin/activate.sh
-echo "done. Config: $CT/config/*  Wallpaper: $CT/launcher/wallpaper.jpg (1920x1080 JPEG)  Log: $CT/log/boot.log"
-echo "Rollback: sh $CT/bin/rollback-home.sh --permanent   Full uninstall: sh tv/uninstall.sh"
+sh $CT/bin/lean.sh && echo "voice / ThinQ / data collection switched off per config/lean.conf"
+sh $CT/bin/perf.sh && echo "performance levers applied per config/perf.conf"
+echo "done. Config: $CT/config/*  Wallpaper: $CT/launcher/wallpaper.jpg (1920x1080 JPEG, then: sh $CT/bin/activate.sh)  Log: $CT/log/boot.log"
+echo "Optional, destructive: sh $CT/bin/delete-bloat.sh --yes [--cast]   Rollback: sh $CT/bin/rollback-home.sh --permanent   Uninstall: sh tv/uninstall.sh"

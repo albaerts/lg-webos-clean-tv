@@ -26,6 +26,44 @@ ignore SIGTERM (here: `/usr/palm/applications/airplay/LunaExecutable`), visible 
 pid unchanged, no black frame (`tv/bin/common.sh: reread_app`). Verified on webOS 11.2 (needs `"forceBlockSystemApp":false`, read from
 `/etc/palm/schemas/sam/applicationManager.blockSystemApp.schema`).
 
+## Black screen (or LG's clock screen saver) after a cold start, SAM is fine
+
+**Seen** 2026-10-26 on the reference C3: TV switched off while the launcher was on screen, next boot showed nothing, a few
+minutes later LG's screen saver (thin clock on black). `systemctl` said sam and eim were active, the launcher files were mounted
+and `getAppInfo` said `type: web`. What differed from the good boots: `bootd` had opened **LG's Flutter Home at 13 s**
+(`NL_HOME_SHOWN bootingHome` in `/var/log/messages`), because the TV had been switched off from Home instead of from an HDMI input.
+
+**Cause:** the hook killed that Flutter process and launched the web launcher in the same second. SAM registered the Flutter
+process' death *after* the web launch and dropped the new instance as well. Result: WAM kept an orphan web process for
+`com.webos.app.home`, SAM no longer listed Home as running, every later `launch` (last-input handler, preload manager, Home key)
+hit the orphan: the lifecycle shows only `launch`, never `foreground`, no window is created. The screen is black, and since
+nothing changes on it, tvpower starts the screen saver.
+
+**How to tell:** compare three views, the surface manager is the truth about what is on screen:
+
+```bash
+luna-send -n 1 -f luna://com.webos.surfacemanager/getForegroundAppInfo '{}'          # what is actually shown
+luna-send -n 1 -f luna://com.webos.applicationManager/running '{}'                   # what SAM thinks is running
+luna-send -n 1 -f luna://com.webos.service.webappmanager/listRunningApps '{"includeSysApps":true}'   # what WAM holds
+luna-send -i -f luna://com.webos.applicationManager/getAppLifeEvents '{"subscribe":true}'            # lifecycle while you launch
+```
+
+**Recover without a reboot:** `closeByAppId` through SAM, then `launch`; the launcher was in the foreground two seconds later.
+WAM's `closeByProcessId` returned `true` but changed nothing, and `kill -9` of the renderer only made WAM reload the page hidden.
+
+```bash
+luna-send -n 1 -f luna://com.webos.applicationManager/closeByAppId '{"id":"com.webos.app.home"}'
+luna-send -n 1 -f luna://com.webos.applicationManager/launch '{"id":"com.webos.app.home"}'
+```
+
+**Fix in this project:** `close_lg_home` in `tv/bin/common.sh` closes LG Home through SAM and waits until neither the process nor
+SAM's running entry exists (kill only as a fallback after 5 s), and `launch_home_verified` checks the surface manager's foreground
+app for 15 s and retries up to three times after cleaning up. The hook uses both.
+
+Verified on 2026-10-26 with a reboot from the launcher (so bootd opened LG Home first): LG Home visible at 13 s, launcher in the
+foreground from 54 s on and stable afterwards. Note that `closeByAppId` on the Flutter Home returns `true` without ending it; what
+matters is waiting until SAM no longer lists Home as running before launching.
+
 ## The launcher mount "doesn't stick" at boot
 
 webOS remounts the app partitions ~35 s after boot and drops bind mounts made before that. The hook retries every 2 s for up to 80 s.

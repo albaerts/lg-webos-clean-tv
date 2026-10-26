@@ -1,10 +1,11 @@
 #!/bin/sh
 # 30-cleantv-home - at every boot: mount the launcher over LG Home, let SAM re-read the manifest WITHOUT restarting SAM,
-# stop the LG Home process, apply app row, open the launcher.
+# close the LG Home process through SAM, apply app row, open the launcher and verify it is in the foreground.
 # RULES learned the hard way (see docs/TROUBLESHOOTING.md):
 #  - never restart sam.service from a hook (eim.service Requires=sam -> deadlock; systemui monitor floods the bus; 90 s stop timeout)
 #  - keep exactly ONE executable file per hook in init.d (run-parts runs everything, even .bak copies)
 #  - count mounts via /proc/mounts target paths, not via `mount` output
+#  - never kill LG Home right before launching the launcher; close it via SAM and wait (black-screen cause no. 6)
 . /var/lib/webosbrew/cleantv/bin/common.sh
 mkdir -p $CT/log; exec >>"$CT/log/boot.log" 2>&1
 echo "=== $(date) uptime=$(cut -d. -f1 /proc/uptime)s START ==="
@@ -21,8 +22,8 @@ echo "=== $(date) uptime=$(cut -d. -f1 /proc/uptime)s START ==="
   [ "$(home_type)" = "web" ] || { reread_app com.webos.app.home; k=0; while [ $k -lt 30 ]; do [ "$(home_type)" = "web" ] && break; sleep 1; k=$((k+1)); done; }
   if [ "$(home_type)" = "web" ]; then
     log "SAM took the launcher as Home"
-    for p in $(lg_home_pids); do kill $p 2>/dev/null; done
-    ls2 $L/launch '{"id":"com.webos.app.home"}' >/dev/null && log "launcher opened"
+    close_lg_home                      # bootd may have opened LG Home first (TV was switched off while on Home)
+    launch_home_verified && log "launcher in foreground" || log "launcher did not reach the foreground after 3 attempts"
     sh $CT/bin/order.sh >/dev/null 2>&1
     sh $CT/bin/remove-preloads.sh >/dev/null 2>&1
     for w in 30 60 120; do sleep $w; for p in $(lg_home_pids); do kill $p 2>/dev/null && log "stray LG Home $p stopped"; done; done
